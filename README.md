@@ -156,11 +156,27 @@ Service detection performed. Please report any incorrect results at https://nmap
 Nmap done: 1 IP address (1 host up) scanned in 126.03 seconds
 ```
 
-### 2、nmaps-81秒
+### 2、nmaps-51秒
 
-> ./nmaps -p - -c 100 -host 61.186.243.130
->
-> 精简了http服务识别，因为后期信息搜集平台会针对http服务单独进行全面识别，当然针对单个IP扫描不能较好的比较，可批量资产进行比较
+> 设置linux服务器ulimt的值为65535
+
+```
+$ ulimit -a
+core file size          (blocks, -c) 0
+data seg size           (kbytes, -d) unlimited
+scheduling priority             (-e) 0
+file size               (blocks, -f) unlimited
+pending signals                 (-i) 7844
+max locked memory       (kbytes, -l) 64
+max memory size         (kbytes, -m) unlimited
+open files                      (-n) 65535
+```
+
+>  ./nmaps -p - -c 100 -rate 2000 -host 61.186.243.130
+
+> 端口扫描快慢取决于rate参数的大小，请设置合理范围，内网中可以设置稍大，超时时间较小。外网设置较小，超时较大点
+
+> 可看到，http服务有点差距，因为精简了http服务识别，后期信息搜集平台会针对http服务单独进行全面识别，当然针对单个IP扫描不能较好的比较，可批量资产进行比较
 
 ```
  _    _ __  __          _____   _____ 
