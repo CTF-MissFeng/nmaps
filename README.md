@@ -22,7 +22,7 @@
   >  words, the algorithm is theoretically reversable: given the output
   >  of the permutation function, we can obtain the original index.
 
-- 指纹识别：使用nmap开源的指纹库，并去除了UDP及探测等级为8以上的部分不常用服务规则，对于单个端口的指纹识别，先并发探测等级优先的规则库，若未匹配到，则在并发探测下一等级规则库（由于是并发探测，故小部分服务会有多个匹配结果，导致匹配结果不精确）
+- 指纹识别：使用nmap开源的指纹库，并去除了UDP及探测等级为8以上的部分不常用服务规则，对于单个端口的指纹识别，先并发探测等级优先的规则库，若未匹配到，则在并发探测下一等级规则库（由于是并发探测，故小部分服务会有多个匹配结果，导致匹配结果不精确），若还是未匹配到相应指纹，则使用常规端口对应的服务进行判断（可能会有误报情况）
 
 ## 命令行说明
 
@@ -85,7 +85,7 @@ Usage of ./nmap:
 
 > 示例IP为fofa随机查询，不针对特定IP，若造成了困恼请联系我进行删除
 
-> 非root权限使用CONNECT方式扫描，适用于Macos、Windows
+> 非root权限使用CONNECT方式扫描，适用于Macos、Windows，但推荐使用Linux服务器进行批量扫描
 
 ```
 ./nmap -host 42.192.0.159 -top-ports 1000                                                                                                                                   (miniconda3)    100%    5.60G 
@@ -110,11 +110,59 @@ Usage of ./nmap:
 [INF] 42.192.0.159:49156  [msrpc] Microsoft Windows RPC  Windows
 ```
 
-> root权限使用SYN方式扫描，速度比CONNECT方式更快，故推荐使用linux服务器进行大批量扫描探测，请设置linux的 ulimit 值为65535
+
+
+## 速度及准确度比较
+
+### 1、nmap-126秒
+
+> nmap -p- -Pn -sV 61.186.243.130
 
 ```
- ./nmap -p - -host 61.186.243.130
+Nmap scan report for 61.186.243.130
+Host is up (0.042s latency).
+Not shown: 65506 closed ports
+PORT      STATE    SERVICE            VERSION
+23/tcp    filtered telnet
+25/tcp    filtered smtp
+80/tcp    filtered http
+137/tcp   filtered netbios-ns
+350/tcp   open     matip-type-a?
+352/tcp   open     http               Microsoft IIS httpd 6.0
+443/tcp   filtered https
+445/tcp   filtered microsoft-ds
+1433/tcp  open     ms-sql-s           Microsoft SQL Server 2008 R2 10.50.1600; RTM
+1723/tcp  filtered pptp
+3389/tcp  open     ssl/ms-wbt-server?
+4444/tcp  filtered krb524
+5554/tcp  filtered sgi-esphttp
+8033/tcp  open     http               Apache Tomcat/Coyote JSP engine 1.1
+8080/tcp  filtered http-proxy
+8081/tcp  filtered blackice-icecap
+8082/tcp  filtered blackice-alerts
+8085/tcp  filtered unknown
+8086/tcp  open     http               Microsoft IIS httpd 10.0
+8088/tcp  filtered radan-http
+8090/tcp  open     opsmessaging?
+8099/tcp  open     http               Microsoft IIS httpd 7.5
+8181/tcp  filtered intermapper
+9090/tcp  open     http               Microsoft IIS httpd 10.0
+9100/tcp  open     jetdirect?
+9101/tcp  open     jetdirect?
+10084/tcp filtered unknown
+20002/tcp open     tcpwrapped
+33400/tcp filtered unknown
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 126.03 seconds
+```
 
+### 2、nmaps-87秒
+
+> ./nmaps -p - -c 50 -host 61.186.243.130
+>
+> 精简了http服务识别，因为后期信息搜集平台会针对http服务单独进行全面识别
+
+```
  _    _ __  __          _____   _____ 
 |  \ | |  \/  |   /\   |  __ \ / ____|
 |   \| | \  / |  /  \  | |__) | (___  
@@ -124,20 +172,20 @@ Usage of ./nmap:
 
 
 [INF] 当前root权限运行TCP/ICMP/SYN扫描
-[INF] nmap指纹库加载成功，共计[42]个探针,[10652]条正则匹配
-[INF] 主机[61.186.243.130]探测到[12]个存活端口 [9100,9090,9101,350,8033,1433,8090,352,3389,8086,20002,8099,]
+[INF] nmap指纹库加载成功，共计[42]个探针,[10652]条正则,[8282]条TCP端口指纹
+[INF] 主机[61.186.243.130]探测到[12]个存活端口 [8033,1433,8086,20002,9090,350,8099,8090,3389,352,9100,9101,]
 [INF] 开始进行端口指纹识别，请稍后
-[INF] 61.186.243.130:20002  []   
+[INF] 61.186.243.130:20002  [commtact-http]   
 [INF] 61.186.243.130:9090  [http] Microsoft IIS httpd 10.0 Windows
 [INF] 61.186.243.130:3389  [ssl]   
-[INF] 61.186.243.130:8086  [http] Microsoft IIS httpd 10.0 Windows
 [INF] 61.186.243.130:8033  [http]  1.1 
-[INF] 61.186.243.130:9101  []   
-[INF] 61.186.243.130:9100  []   
-[INF] 61.186.243.130:8099  []   
-[INF] 61.186.243.130:8090  []   
-[INF] 61.186.243.130:350  []   
+[INF] 61.186.243.130:8086  [http] Microsoft IIS httpd 10.0 Windows
+[INF] 61.186.243.130:8090  [opsmessaging]   
+[INF] 61.186.243.130:9100  [jetdirect]   
+[INF] 61.186.243.130:8099  [unknown]   
+[INF] 61.186.243.130:9101  [jetdirect]   
+[INF] 61.186.243.130:350  [matip-type-a]   
 [INF] 61.186.243.130:1433  [ms-sql-s] Microsoft SQL Server 2008 R2 10.50.1600; RTM Windows
-[INF] 61.186.243.130:352  []
+[INF] 61.186.243.130:352  [dtag-ste-sb]
 ```
 
