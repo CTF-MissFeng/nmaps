@@ -156,9 +156,9 @@ Service detection performed. Please report any incorrect results at https://nmap
 Nmap done: 1 IP address (1 host up) scanned in 126.03 seconds
 ```
 
-### 2、nmaps-87秒
+### 2、nmaps-81秒
 
-> ./nmaps -p - -c 50 -host 61.186.243.130
+> ./nmaps -p - -c 100 -host 61.186.243.130
 >
 > 精简了http服务识别，因为后期信息搜集平台会针对http服务单独进行全面识别
 
